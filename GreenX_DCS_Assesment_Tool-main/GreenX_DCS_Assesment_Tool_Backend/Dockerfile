@@ -1,9 +1,11 @@
-FROM python:3.11-slim
+FROM python:3.10-slim
 
-# Install system dependencies needed for psycopg2
+# Install system dependencies needed for building wheels
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
+    libffi-dev \
     libpq-dev \
+    musl-dev \
     python3-dev \
     build-essential \
     && apt-get clean \
