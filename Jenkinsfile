@@ -6,62 +6,62 @@ pipeline {
         FRONTEND_DIR = "GreenX_DCS_Assesment_Tool-main/greenX-assessment-tool-frontend"
     }
 
-    stages {
+    triggers {
+        githubPush()   // auto-trigger on each GitHub push
+    }
 
-        stage('Checkout') {
-            steps {
-                git branch: 'main',
-                    url: 'https://github.com/yeshfaandleeb1/docker-task-clean.git'
-            }
-        }
+    stages {
 
         stage('Clean Workspace') {
             steps {
-                echo "🧹 Cleaning workspace..."
                 cleanWs()
+            }
+        }
+
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/yeshfaandleeb1/docker-task-clean.git',
+                    credentialsId: 'github-credentials'
             }
         }
 
         stage('Build Backend Docker Image') {
             steps {
-                echo "📦 Building backend..."
+                echo "📦 Building Backend Image..."
                 dir("${BACKEND_DIR}") {
-                    sh 'docker build -t greenx-backend:latest .'
+                    sh "docker build -t greenx-backend:latest ."
                 }
             }
         }
 
         stage('Build Frontend Docker Image') {
             steps {
-                echo "🖥️ Building frontend..."
+                echo "🌐 Building Frontend Image..."
                 dir("${FRONTEND_DIR}") {
-                    sh 'docker build -t greenx-frontend:latest .'
+                    sh "docker build -t greenx-frontend:latest ."
                 }
             }
         }
 
         stage('List Docker Images') {
             steps {
-                sh 'docker images'
+                sh "docker images"
             }
         }
     }
 
     post {
         success {
-            emailext(
-                to: 'yeshfaandleeb05@gmail.com',
-                subject: "✅ Jenkins Pipeline Success — docker-task-clean",
-                body: "Your Jenkins pipeline completed successfully."
-            )
+            emailext to: 'yeshfaandleeb05@gmail.com',
+                subject: "SUCCESS: Jenkins Pipeline Build Completed ✔",
+                body: "Your pipeline has successfully completed!"
         }
 
         failure {
-            emailext(
-                to: 'yeshfaandleeb05@gmail.com',
-                subject: "❌ Jenkins Pipeline FAILED — docker-task-clean",
-                body: "Your Jenkins pipeline FAILED. Please check logs."
-            )
+            emailext to: 'yeshfaandleeb05@gmail.com',
+                subject: "FAILED ❌: Jenkins Pipeline Build",
+                body: "Your pipeline failed. Please check Jenkins logs."
         }
     }
 }
