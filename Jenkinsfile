@@ -17,7 +17,7 @@ pipeline {
             steps {
                 git branch: 'main',
                     credentialsId: 'github_creds',
-                    url: 'https://github.com/yeshfaandleeb1/GreenX_DCS_Assesment_Tool.git'
+                    url: 'https://github.com/yeshfaandleeb1/docker-task-clean.git'
             }
         }
 
@@ -37,7 +37,7 @@ pipeline {
             }
         }
 
-        /* 3️⃣ QUALITY GATE */
+        /* 3️⃣ SONAR QUALITY GATE */
         stage("Sonar Quality Gate") {
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
@@ -50,8 +50,8 @@ pipeline {
         stage('Docker Build') {
             steps {
                 sh """
-                    docker build -t ${BACKEND_IMAGE}:latest ./GreenX_DCS_Assesment_Tool_Backend
-                    docker build -t ${FRONTEND_IMAGE}:latest ./greenx-assessment-tool-frontend
+                    docker build -t ${BACKEND_IMAGE}:latest ./GreenX_DCS_Assement_Tool-main/GreenX_DCS_Assement_Tool_Backend
+                    docker build -t ${FRONTEND_IMAGE}:latest ./GreenX_DCS_Assement_Tool-main/greenx-assessment-tool-frontend
                 """
             }
         }
@@ -67,7 +67,7 @@ pipeline {
             }
         }
 
-        /* 6️⃣ IMAGE LISTING */
+        /* 6️⃣ LIST DOCKER IMAGES */
         stage('List Docker Images') {
             steps {
                 sh "docker images"
@@ -75,7 +75,7 @@ pipeline {
         }
     }
 
-    /* 7️⃣ NOTIFICATIONS */
+    /* 7️⃣ EMAIL NOTIFICATIONS */
     post {
         success {
             emailext(
