@@ -25,8 +25,9 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('MySonar') {
+                    // Use installed SonarScanner from: /opt/sonar-scanner/bin/sonar-scanner
                     sh """
-                        sonar-scanner \
+                        /opt/sonar-scanner/bin/sonar-scanner \
                           -Dsonar.projectKey=GreenX \
                           -Dsonar.projectName=GreenX \
                           -Dsonar.sources=. \
