@@ -2,66 +2,78 @@ pipeline {
     agent any
 
     environment {
-        BACKEND_DIR = "GreenX_DCS_Assesment_Tool-main/GreenX_DCS_Assesment_Tool_Backend"
-        FRONTEND_DIR = "GreenX_DCS_Assesment_Tool-main/greenX-assessment-tool-frontend"
-    }
+        GITHUB = credentials('github_creds')
+        DOCKERHUB = credentials('dockerhub_creds')
+        SONAR = credentials('sonar_token')
 
-    triggers {
-        githubPush()   // auto-trigger on each GitHub push
+        BACKEND_IMAGE = "yeshfaandleeb01/greenx-backend"
+        FRONTEND_IMAGE = "yeshfaandleeb01/greenx-frontend"
     }
 
     stages {
 
-        stage('Clean Workspace') {
-            steps {
-                cleanWs()
-            }
-        }
-
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/yeshfaandleeb1/docker-task-clean.git',
-                    credentialsId: 'github-credentials'
+                    credentialsId: 'github_creds',
+                    url: 'https://github.com/yeshfaandleeb01/GreenX_DCS_Assesment_Tool.git'
             }
         }
 
-        stage('Build Backend Docker Image') {
+        stage('SonarQube Analysis') {
             steps {
-                echo "📦 Building Backend Image..."
-                dir("${BACKEND_DIR}") {
-                    sh "docker build -t greenx-backend:latest ."
+                withSonarQubeEnv('sonarqube') {
+                    sh """
+                        sonar-scanner \
+                          -Dsonar.projectKey=GreenX \
+                          -Dsonar.sources=. \
+                          -Dsonar.host.url=http://localhost:9000 \
+                          -Dsonar.login=${SONAR}
+                    """
                 }
             }
         }
 
-        stage('Build Frontend Docker Image') {
+        stage("Sonar Quality Gate") {
             steps {
-                echo "🌐 Building Frontend Image..."
-                dir("${FRONTEND_DIR}") {
-                    sh "docker build -t greenx-frontend:latest ."
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
                 }
             }
         }
 
-        stage('List Docker Images') {
+        stage('Docker Build') {
             steps {
-                sh "docker images"
+                sh """
+                    docker build -t ${BACKEND_IMAGE}:latest ./GreenX_DCS_Assesment_Tool_Backend
+                    docker build -t ${FRONTEND_IMAGE}:latest ./greenx-assessment-tool-frontend
+                """
+            }
+        }
+
+        stage('Docker Push') {
+            steps {
+                sh "echo ${DOCKERHUB_PSW} | docker login -u ${DOCKERHUB_USR} --password-stdin"
+                sh "docker push ${BACKEND_IMAGE}:latest"
+                sh "docker push ${FRONTEND_IMAGE}:latest"
             }
         }
     }
 
     post {
         success {
-            emailext to: 'yeshfaandleeb05@gmail.com',
-                subject: "SUCCESS: Jenkins Pipeline Build Completed ✔",
-                body: "Your pipeline has successfully completed!"
+            emailext(
+                subject: "SUCCESS: GreenX Jenkins Pipeline",
+                body: "GreenX CI/CD Pipeline completed successfully.",
+                to: "yeshfaandleeb05@gmail.com"
+            )
         }
-
         failure {
-            emailext to: 'yeshfaandleeb05@gmail.com',
-                subject: "FAILED ❌: Jenkins Pipeline Build",
-                body: "Your pipeline failed. Please check Jenkins logs."
+            emailext(
+                subject: "FAILED: GreenX Jenkins Pipeline",
+                body: "Pipeline failed. Please check Jenkins logs.",
+                to: "yeshfaandleeb05@gmail.com"
+            )
         }
     }
 }
