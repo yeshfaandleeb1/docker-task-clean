@@ -12,7 +12,6 @@ pipeline {
 
     stages {
 
-        /* 1️⃣ CHECKOUT */
         stage('Checkout') {
             steps {
                 git branch: 'main',
@@ -21,11 +20,9 @@ pipeline {
             }
         }
 
-        /* 2️⃣ SONAR SCAN */
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('MySonar') {
-                    // Use installed SonarScanner from: /opt/sonar-scanner/bin/sonar-scanner
                     sh """
                         /opt/sonar-scanner/bin/sonar-scanner \
                           -Dsonar.projectKey=GreenX \
@@ -38,16 +35,14 @@ pipeline {
             }
         }
 
-        /* 3️⃣ SONAR QUALITY GATE */
         stage("Sonar Quality Gate") {
             steps {
-                timeout(time: 5, unit: 'MINUTES') {
+                timeout(time: 10, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
             }
         }
 
-        /* 4️⃣ DOCKER BUILD */
         stage('Docker Build') {
             steps {
                 sh """
@@ -57,7 +52,6 @@ pipeline {
             }
         }
 
-        /* 5️⃣ DOCKER PUSH */
         stage('Docker Push') {
             steps {
                 sh """
@@ -68,7 +62,6 @@ pipeline {
             }
         }
 
-        /* 6️⃣ LIST DOCKER IMAGES */
         stage('List Docker Images') {
             steps {
                 sh "docker images"
@@ -76,7 +69,6 @@ pipeline {
         }
     }
 
-    /* 7️⃣ EMAIL NOTIFICATIONS */
     post {
         success {
             emailext(
