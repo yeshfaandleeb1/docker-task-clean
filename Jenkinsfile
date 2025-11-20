@@ -17,7 +17,7 @@ pipeline {
             steps {
                 git branch: 'main',
                     credentialsId: 'github_creds',
-                    url: 'https://github.com/yeshfaandleeb01/GreenX_DCS_Assesment_Tool.git'
+                    url: 'https://github.com/yeshfaandleeb1/GreenX_DCS_Assesment_Tool.git'
             }
         }
 
