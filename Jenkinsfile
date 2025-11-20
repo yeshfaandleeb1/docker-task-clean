@@ -2,42 +2,38 @@ pipeline {
     agent any
 
     environment {
-        GITHUB = credentials('github_creds')
-        DOCKERHUB = credentials('dockerhub_creds')
-        SONAR = credentials('sonar-token')
-
-        BACKEND_IMAGE = "yeshfaandleeb01/greenx-backend"
-        FRONTEND_IMAGE = "yeshfaandleeb01/greenx-frontend"
+        SONAR_HOST = "http://3.239.85.144:9000"
     }
 
     stages {
-
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                    credentialsId: 'github_creds',
-                    url: 'https://github.com/yeshfaandleeb1/docker-task-clean.git'
+                credentialsId: 'github_creds',
+                url: 'https://github.com/yeshfaandleeb1/docker-task-clean.git'
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('MySonar') {
-                    sh """
+                    withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                        sh """
                         /opt/sonar-scanner/bin/sonar-scanner \
                           -Dsonar.projectKey=GreenX \
                           -Dsonar.projectName=GreenX \
                           -Dsonar.sources=. \
-                          -Dsonar.host.url=http://3.239.85.144:9000 \
-                          -Dsonar.login=${SONAR}
-                    """
+                          -Dsonar.host.url=${SONAR_HOST} \
+                          -Dsonar.login=${SONAR_TOKEN}
+                        """
+                    }
                 }
             }
         }
 
         stage("Sonar Quality Gate") {
             steps {
-                timeout(time: 45, unit: 'MINUTES') {
+                timeout(time: 60, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
             }
@@ -45,43 +41,38 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                sh """
-                    docker build -t ${BACKEND_IMAGE}:latest ./GreenX_DCS_Assement_Tool-main/GreenX_DCS_Assement_Tool_Backend
-                    docker build -t ${FRONTEND_IMAGE}:latest ./GreenX_DCS_Assement_Tool-main/greenx-assessment-tool-frontend
-                """
+                sh 'docker build -t greenx_backend ./GreenX_DCS_Assesment_Tool_Backend'
+                sh 'docker build -t greenx_frontend ./greenX-assessment-tool-frontend'
             }
         }
 
         stage('Docker Push') {
             steps {
-                sh """
-                    echo ${DOCKERHUB_PSW} | docker login -u ${DOCKERHUB_USR} --password-stdin
-                    docker push ${BACKEND_IMAGE}:latest
-                    docker push ${FRONTEND_IMAGE}:latest
-                """
+                withCredentials([usernamePassword(credentialsId: 'dockerhub_creds',
+                                                 usernameVariable: 'USER',
+                                                 passwordVariable: 'PASS')]) {
+                    sh """
+                    echo $PASS | docker login -u $USER --password-stdin
+                    docker push greenx_backend
+                    docker push greenx_frontend
+                    """
+                }
             }
         }
 
         stage('List Docker Images') {
             steps {
-                sh "docker images"
+                sh 'docker images'
             }
         }
     }
 
     post {
-        success {
-            emailext(
-                subject: "SUCCESS: GreenX Jenkins Pipeline",
-                body: "GreenX CI/CD Pipeline completed successfully.",
-                to: "yeshfaandleeb05@gmail.com"
-            )
-        }
         failure {
-            emailext(
-                subject: "FAILED: GreenX Jenkins Pipeline",
-                body: "Pipeline failed. Please check Jenkins logs.",
-                to: "yeshfaandleeb05@gmail.com"
+            emailext (
+                to: "yeshfaandleeb05@gmail.com",
+                subject: "Jenkins Build Failed",
+                body: "Build failed. Check Jenkins console."
             )
         }
     }
