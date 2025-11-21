@@ -15,9 +15,10 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                // use the exact name from Jenkins → Configure System → SonarQube Servers
+                // Use the exact SonarQube installation name configured in Jenkins
                 withSonarQubeEnv('MySonar') { 
-                    withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_LOGIN')]) {
+                    // Use EXISTING credential ID: SONAR_TOKEN
+                    withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_LOGIN')]) {
                         sh """
                         /opt/sonar-scanner/bin/sonar-scanner \
                             -Dsonar.projectKey=GreenX \
