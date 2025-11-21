@@ -15,8 +15,8 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                // 'sonar-server' = name set in Jenkins → Configure System
-                withSonarQubeEnv('sonar-server') { 
+                // use the exact name from Jenkins → Configure System → SonarQube Servers
+                withSonarQubeEnv('MySonar') { 
                     withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_LOGIN')]) {
                         sh """
                         /opt/sonar-scanner/bin/sonar-scanner \
