@@ -15,9 +15,7 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                // Use the exact SonarQube installation name configured in Jenkins
-                withSonarQubeEnv('MySonar') { 
-                    // Use EXISTING credential ID: SONAR_TOKEN
+                withSonarQubeEnv('MySonar') {
                     withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_LOGIN')]) {
                         sh """
                         /opt/sonar-scanner/bin/sonar-scanner \
@@ -32,9 +30,9 @@ pipeline {
             }
         }
 
-        stage('Sonar Quality Gate') {
+        stage('Quality Gate') {
             steps {
-                timeout(time: 3, unit: 'MINUTES') {
+                timeout(time: 10, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
             }
