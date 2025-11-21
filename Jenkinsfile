@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        SONARQUBE_URL = 'http://3.239.85.144:9000'
+        SONARQUBE_URL = 'http://18.207.238.222:9000'
     }
 
     stages {
@@ -15,15 +15,16 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('MySonar') {
-                    withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_LOGIN')]) {
+                // 'sonar-server' = name set in Jenkins → Configure System
+                withSonarQubeEnv('sonar-server') { 
+                    withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_LOGIN')]) {
                         sh """
                         /opt/sonar-scanner/bin/sonar-scanner \
-                          -Dsonar.projectKey=GreenX \
-                          -Dsonar.projectName=GreenX \
-                          -Dsonar.sources=. \
-                          -Dsonar.host.url=$SONARQUBE_URL \
-                          -Dsonar.login=$SONAR_LOGIN
+                            -Dsonar.projectKey=GreenX \
+                            -Dsonar.projectName=GreenX \
+                            -Dsonar.sources=. \
+                            -Dsonar.host.url=$SONARQUBE_URL \
+                            -Dsonar.login=$SONAR_LOGIN
                         """
                     }
                 }
@@ -32,15 +33,20 @@ pipeline {
 
         stage('Sonar Quality Gate') {
             steps {
-                timeout(time: 2, unit: 'MINUTES') {
+                timeout(time: 3, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
             }
         }
 
-        stage('Docker Build') {
+        stage('Docker Build Backend') {
             steps {
                 sh 'docker build -t greenx-backend ./GreenX_DCS_Assesment_Tool_Backend'
+            }
+        }
+
+        stage('Docker Build Frontend') {
+            steps {
                 sh 'docker build -t greenx-frontend ./greenX-assessment-tool-frontend'
             }
         }
