@@ -68,9 +68,17 @@ pipeline {
             }
         }
 
-        stage('List Docker Images') {
+        stage('Approval') {
             steps {
-                sh 'docker images'
+                script {
+                    input message: 'Deploy to production?'
+                }
+            }
+        }
+
+        stage('Deploy using Docker Compose') {
+            steps {
+                sh 'docker compose -f docker-compose.yml up -d'
             }
         }
     }
@@ -80,7 +88,7 @@ pipeline {
             emailext(
                 to: 'yeshfaandleeb05@gmail.com',
                 subject: "Jenkins Pipeline Finished",
-                body: "Pipeline completed."
+                body: "Pipeline completed successfully."
             )
         }
     }
