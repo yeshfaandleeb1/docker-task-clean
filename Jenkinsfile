@@ -40,19 +40,13 @@ pipeline {
 
         stage('Docker Build Backend') {
             steps {
-                sh """
-                    docker build -t greenx-backend \
-                    ./GreenX_DCS_Assessment_Tool-main/GreenX_DCS_Assesment_Tool_Backend
-                """
+                sh 'docker build -t greenx-backend ./GreenX_DCS_Assesment_Tool-main/GreenX_DCS_Assesment_Tool_Backend'
             }
         }
 
         stage('Docker Build Frontend') {
             steps {
-                sh """
-                    docker build -t greenx-frontend \
-                    ./GreenX_DCS_Assessment_Tool-main/greenX-assessment-tool-frontend
-                """
+                sh 'docker build -t greenx-frontend ./GreenX_DCS_Assesment_Tool-main/greenX-assessment-tool-frontend'
             }
         }
 
@@ -76,7 +70,7 @@ pipeline {
 
         stage('List Docker Images') {
             steps {
-                sh "docker images"
+                sh 'docker images'
             }
         }
     }
@@ -86,7 +80,7 @@ pipeline {
             emailext(
                 to: 'yeshfaandleeb05@gmail.com',
                 subject: "Jenkins Pipeline Finished",
-                body: "The pipeline has completed."
+                body: "Pipeline completed."
             )
         }
     }
