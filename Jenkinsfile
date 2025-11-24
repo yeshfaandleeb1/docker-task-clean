@@ -2,8 +2,10 @@ pipeline {
     agent any
 
     environment {
-        // Path where Jenkins installed the SonarQube Scanner tool (DefaultScanner)
+        // SonarQube Scanner installation (Manage Jenkins → Tools)
         SCANNER_HOME = tool 'DefaultScanner'
+        // Sonar token from Jenkins credentials (ID must match your secret text ID)
+        SONAR_TOKEN  = credentials('sonar-token')
     }
 
     stages {
@@ -15,8 +17,12 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
+                // Inject SONAR_HOST_URL etc. from server config "SonarQube-Local"
                 withSonarQubeEnv('SonarQube-Local') {
-                    sh "${SCANNER_HOME}/bin/sonar-scanner"
+                    sh """
+                    ${SCANNER_HOME}/bin/sonar-scanner \
+                      -Dsonar.login=${SONAR_TOKEN}
+                    """
                 }
             }
         }
@@ -28,6 +34,6 @@ pipeline {
             }
         }
 
-        // later we'll add backend/frontend docker build stages here
+        // later we will add backend/frontend docker build stages
     }
 }
