@@ -38,5 +38,27 @@ pipeline {
             }
         }
 
+        /* ----------------------
+           NEW STAGE HERE ONLY
+           ---------------------- */
+        stage('Docker Build') {
+            steps {
+                sh """
+                    echo "Building Docker images using BuildKit"
+
+                    export DOCKER_BUILDKIT=1
+
+                    # Vote Service Image
+                    docker build -t vote:${BUILD_NUMBER} ./vote
+
+                    # Result Service Image
+                    docker build -t result:${BUILD_NUMBER} ./result
+
+                    # Worker Service Image
+                    docker build -t worker:${BUILD_NUMBER} ./worker
+                """
+            }
+        }
+
     }
 }
