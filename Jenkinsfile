@@ -16,21 +16,23 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube-Local') {
-                    sh """
-                        ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
-                        -Dsonar.projectKey=docker-task \
-                        -Dsonar.sources=. \
-                        -Dsonar.host.url=http://192.168.1.17:9000 \
-                        -Dsonar.token=${SONAR_TOKEN}
-                    """
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                    withSonarQubeEnv('SonarQube-Local') {
+                        sh """
+                            ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
+                            -Dsonar.projectKey=docker-task \
+                            -Dsonar.sources=. \
+                            -Dsonar.host.url=http://192.168.1.17:9000 \
+                            -Dsonar.token=${SONAR_TOKEN}
+                        """
+                    }
                 }
             }
         }
 
         stage('Quality Gate') {
             steps {
-                timeout(time: 45, unit: 'MINUTES') {
+                timeout(time: 10, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
             }
