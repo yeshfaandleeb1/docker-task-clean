@@ -20,10 +20,10 @@ pipeline {
                     withSonarQubeEnv('SonarQube-Local') {
                         sh """
                             ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
-                            -Dsonar.projectKey=docker-task \
-                            -Dsonar.sources=. \
-                            -Dsonar.host.url=http://192.168.1.17:9000 \
-                            -Dsonar.token=${SONAR_TOKEN}
+                              -Dsonar.projectKey=docker-task \
+                              -Dsonar.sources=. \
+                              -Dsonar.host.url=http://192.168.1.17:9000 \
+                              -Dsonar.token=${SONAR_TOKEN}
                         """
                     }
                 }
@@ -38,9 +38,9 @@ pipeline {
             }
         }
 
-        /* ----------------------
-           NEW STAGE HERE ONLY
-           ---------------------- */
+        // ---------------------------
+        // 4. Docker Build (FINAL)
+        // ---------------------------
         stage('Docker Build') {
             steps {
                 sh """
@@ -48,14 +48,15 @@ pipeline {
 
                     export DOCKER_BUILDKIT=1
 
-                    # Vote Service Image
-                    docker build -t vote:${BUILD_NUMBER} ./vote
+                    echo "Building backend image..."
+                    docker build \
+                      -t greenx-backend:${BUILD_NUMBER} \
+                      ./GreenX_DCS_Assement_Tool-main/GreenX_DCS_Assement_Tool_Backend
 
-                    # Result Service Image
-                    docker build -t result:${BUILD_NUMBER} ./result
-
-                    # Worker Service Image
-                    docker build -t worker:${BUILD_NUMBER} ./worker
+                    echo "Building frontend image..."
+                    docker build \
+                      -t greenx-frontend:${BUILD_NUMBER} \
+                      ./GreenX_DCS_Assement_Tool-main/greenX-assesment-tool-frontend
                 """
             }
         }
