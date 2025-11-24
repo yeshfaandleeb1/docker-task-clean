@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        SONAR_TOKEN = credentials('sonar-token')
+        SONAR_SCANNER_HOME = tool 'DefaultScanner'
     }
 
     stages {
@@ -10,8 +10,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 echo "Checking out code..."
-                git branch: 'main',
-                    url: 'https://github.com/yeshfaandleeb1/docker-task-clean.git'
+                git url: 'https://github.com/yeshfaandleeb1/docker-task-clean.git', branch: 'main'
             }
         }
 
@@ -19,23 +18,23 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube-Local') {
                     sh """
-                        ${tool 'DefaultScanner'}/bin/sonar-scanner \
-                          -Dsonar.projectKey=docker-task \
-                          -Dsonar.sources=. \
-                          -Dsonar.host.url=http://192.168.1.17:9000 \
-                          -Dsonar.login=$SONAR_TOKEN
+                        ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
+                        -Dsonar.projectKey=docker-task \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=http://192.168.1.17:9000 \
+                        -Dsonar.token=${SONAR_TOKEN}
                     """
                 }
             }
         }
 
-        /* ✅ ONLY THIS NEW STAGE ADDED (NOTHING ELSE CHANGED) */
         stage('Quality Gate') {
             steps {
-                timeout(time: 2, unit: 'MINUTES') {
+                timeout(time: 45, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
             }
         }
+
     }
 }
