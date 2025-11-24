@@ -2,12 +2,10 @@ pipeline {
     agent any
 
     tools {
-        // SonarQube Scanner installed from Jenkins -> Global Tool Configuration
-        sonarRunner 'DefaultScanner'
+        sonarScanner 'DefaultScanner'
     }
 
     environment {
-        // SonarQube token stored in Jenkins Credentials as "sonar-token"
         SONAR_TOKEN = credentials('sonar-token')
     }
 
@@ -15,36 +13,31 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                checkout scm
+                echo "Checking out code..."
+                git branch: 'main',
+                    url: 'https://github.com/yeshfaandleeb1/docker-task-clean.git'
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube-Local') {
-                    sh '''
-/var/lib/jenkins/tools/hudson.plugins.sonar.SonarRunnerInstallation/DefaultScanner/bin/sonar-scanner \
-  -Dsonar.login=$SONAR_TOKEN \
-  -Dsonar.ws.timeout=600
-'''
+                withSonarQubeEnv('sonar-server') {
+                    sh """
+                        sonar-scanner \
+                          -Dsonar.projectKey=docker-task \
+                          -Dsonar.sources=. \
+                          -Dsonar.host.url=http://192.168.1.17:9000 \
+                          -Dsonar.login=$SONAR_TOKEN
+                    """
                 }
             }
         }
 
-        stage("Quality Gate") {
+        stage('Quality Gate') {
             steps {
-                timeout(time: 10, unit: 'MINUTES') {
+                timeout(time: 2, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
-            }
-        }
-
-        stage('Docker Smoke Test') {
-            when {
-                expression { return false }  // Enable later if needed
-            }
-            steps {
-                echo "Docker stage will be added later."
             }
         }
     }
