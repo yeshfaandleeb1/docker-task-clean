@@ -17,7 +17,7 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('sonar-server') {
+                withSonarQubeEnv('SonarQube-Local') {
                     sh """
                         ${tool 'DefaultScanner'}/bin/sonar-scanner \
                           -Dsonar.projectKey=docker-task \
