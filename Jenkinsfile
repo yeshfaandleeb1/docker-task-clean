@@ -1,13 +1,8 @@
 pipeline {
     agent any
 
-    tools {
-        // Name must match Manage Jenkins → Tools
-        sonarQubeScanner 'DefaultScanner'
-    }
-
     environment {
-        // Use the scanner tool path
+        // Path where Jenkins installed the SonarQube Scanner tool (DefaultScanner)
         SCANNER_HOME = tool 'DefaultScanner'
     }
 
@@ -33,6 +28,6 @@ pipeline {
             }
         }
 
-        // your existing backend/frontend Docker build stages can stay below
+        // later we'll add backend/frontend docker build stages here
     }
 }
