@@ -29,6 +29,7 @@ pipeline {
             }
         }
 
+        /* ✅ ONLY THIS NEW STAGE ADDED (NOTHING ELSE CHANGED) */
         stage('Quality Gate') {
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
