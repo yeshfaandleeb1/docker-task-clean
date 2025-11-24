@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        sonarScanner 'DefaultScanner'
-    }
-
     environment {
         SONAR_TOKEN = credentials('sonar-token')
     }
@@ -23,7 +19,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('sonar-server') {
                     sh """
-                        sonar-scanner \
+                        ${tool 'DefaultScanner'}/bin/sonar-scanner \
                           -Dsonar.projectKey=docker-task \
                           -Dsonar.sources=. \
                           -Dsonar.host.url=http://192.168.1.17:9000 \
