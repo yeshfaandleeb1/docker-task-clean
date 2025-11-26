@@ -24,20 +24,7 @@ pipeline {
                 sh '''
                     echo "===== Building Frontend Image ====="
                     docker build -t greenx-frontend:${BUILD_NUMBER} \
-                    ./GreenX_DCS_Assesment_Tool-main/greenX-assessment-tool-frontend
-                '''
-            }
-        }
-
-        /* ================================
-           DOCKER BUILD WORKER
-        ================================= */
-        stage('Docker Build Worker') {
-            steps {
-                sh '''
-                    echo "===== Building Worker Image ====="
-                    docker build -t greenx-worker:${BUILD_NUMBER} \
-                    ./GreenX_DCS_Assesment_Tool-main/worker
+                    ./GreenX_DCS_Assesment_Tool-main/greenx-assessment-tool-frontend
                 '''
             }
         }
@@ -63,10 +50,6 @@ pipeline {
                                 echo "===== Scanning Frontend Image ====="
                                 trivy image --format template --template @/opt/trivy-templates/html.tpl \
                                   -o trivy-reports/trivy-frontend-report.html greenx-frontend:${BUILD_NUMBER}
-
-                                echo "===== Scanning Worker Image ====="
-                                trivy image --format template --template @/opt/trivy-templates/html.tpl \
-                                  -o trivy-reports/trivy-worker-report.html greenx-worker:${BUILD_NUMBER}
                             '''
 
                             archiveArtifacts artifacts: 'trivy-reports/*.html', fingerprint: true
@@ -87,12 +70,10 @@ pipeline {
                                     echo "===== Tagging Images ====="
                                     docker tag greenx-backend:${BUILD_NUMBER} $DOCKER_USER/greenx-backend:${BUILD_NUMBER}
                                     docker tag greenx-frontend:${BUILD_NUMBER} $DOCKER_USER/greenx-frontend:${BUILD_NUMBER}
-                                    docker tag greenx-worker:${BUILD_NUMBER} $DOCKER_USER/greenx-worker:${BUILD_NUMBER}
 
                                     echo "===== Pushing Images to DockerHub ====="
                                     docker push $DOCKER_USER/greenx-backend:${BUILD_NUMBER}
                                     docker push $DOCKER_USER/greenx-frontend:${BUILD_NUMBER}
-                                    docker push $DOCKER_USER/greenx-worker:${BUILD_NUMBER}
 
                                     echo "===== ALL IMAGES PUSHED SUCCESSFULLY ====="
                                 '''
