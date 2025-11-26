@@ -1,190 +1,0 @@
-Script started on 2025-11-21 15:20:31+00:00 [TERM="xterm" TTY="/dev/pts/0" COLUMNS="126" LINES="33"]
-[?2004h]0;ubuntu@ip-172-31-76-219: ~/docker-task-cleanubuntu@ip-172-31-76-219:~/docker-task-clean$ [H[2J]0;ubuntu@ip-172-31-76-219: ~/docker-task-cleanubuntu@ip-172-31-76-219:~/docker-task-clean$ git push origin main
-[?2004lUsername for 'https://github.com': ^L  ^X^C
-[?2004h]0;ubuntu@ip-172-31-76-219: ~/docker-task-cleanubuntu@ip-172-31-76-219:~/docker-task-clean$ git push origin maincommit -m "Updated Jenkinsfile with correct SONAR_TOKEn"[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Cadd Jenkinsfile[K[3Pnano[C[C[C[C[C[C[C[C[C[C[C[C
-[?2004l[?2004h[?1049h[22;0;0t[1;33r(B[m[4l[?7h[39;49m[?1h=[?1h=[?25l[39;49m(B[m[H[2J[31;57H(B[0;7m[ Reading... ](B[m[31;55H(B[0;7m[ Read 95 lines ](B[m[H(B[0;7m  GNU nano 7.2                                              Jenkinsfile                                                       [1;125H(B[m[32d(B[0;7m^G(B[m Help[32;16H(B[0;7m^O(B[m Write Out   (B[0;7m^W(B[m Where Is    (B[0;7m^K(B[m Cut[32;61H(B[0;7m^T(B[m Execute     (B[0;7m^C(B[m Location    (B[0;7mM-U(B[m Undo[106G(B[0;7mM-A(B[m Set Mark[33d(B[0;7m^X(B[m Exit[33;16H(B[0;7m^R(B[m Read File   (B[0;7m^\(B[m Replace     (B[0;7m^U(B[m Paste[61G(B[0;7m^J(B[m Justify     (B[0;7m^/(B[m Go To Line  (B[0;7mM-E(B[m Redo[106G(B[0;7mM-6(B[m Copy[2dpipeline {[3;5Hagent any[5;5Henvironment {[6;9HSONARQUBE_URL = '(B[0;1m[34mhttp://18.207.238.222:9000'[7;5H[39m(B[m}[9dstages {[11;9Hstage('Checkout') {[12;13Hsteps {[13;17Hcheckout scm[14;13H}[15;9H}[17dstage('SonarQube Analysis') {[18;13Hsteps {[19;17HwithSonarQubeEnv('MySonar') {[20;21HwithCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_LOGIN')]) {[21;25Hsh """[22;25H/opt/sonar-scanner/bin/sonar-scanner \[23;27H-Dsonar.projectKey=GreenX \[24;27H-Dsonar.projectName=GreenX \[25;27H-Dsonar.sources=. \[26;27H-Dsonar.host.url=$SONARQUBE_URL \[27;27H-Dsonar.login=$SONAR_LOGIN[28;25H"""[29;21H}[30;17H}[2d[?12l[?25h[?25l[1;73H(B[0;7m*[125G(B[m[2;31r[31;1H
-[1;33r[30;13H}[K[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9Hstage('Quality Gate') {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;13Hsteps {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;17Htimeout(time: 10, unit: 'MINUTES') {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;21HwaitForQualityGate abortPipeline: true[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;17H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;13H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9Hstage('Docker Build Backend') {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;13Hsteps {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;17Hsh 'docker build -t greenx-backend ./GreenX_DCS_Assesment_Tool-main/GreenX_DCS_Assesment_Tool_Backend'[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;13H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9Hstage('Docker Build Frontend') {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;13Hsteps {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;17Hsh 'docker build -t greenx-frontend ./GreenX_DCS_Assesment_Tool-main/greenX-assessment-tool-frontend'[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;13H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9Hstage('Docker Push') {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;13Hsteps {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;17HwithCredentials([usernamePassword([2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;21HcredentialsId: 'dockerhub_creds',[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;21HusernameVariable: 'DOCKER_USER',[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;21HpasswordVariable: 'DOCKER_PASS'[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;17H)]) {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;21Hsh """[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;25Hecho $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;25Hdocker tag greenx-backend $DOCKER_USER/greenx-backend:latest[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;25Hdocker tag greenx-frontend $DOCKER_USER/greenx-frontend:latest[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;25Hdocker push $DOCKER_USER/greenx-backend:latest[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;25Hdocker push $DOCKER_USER/greenx-frontend:latest[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;21H"""[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;17H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;13H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9Hstage('Approval') {[2d[?12l[?25h[?25l[2;31r[31;1H[2S[1;33r[29;13Hsteps {[30;17Hscript {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;21Hinput message: 'Deploy to production?'[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;17H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;13H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H[2S[1;33r[29;9Hstage('Deploy using Docker Compose') {[30;13Hsteps {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;17Hsh 'docker compose -f docker-compose.yml up -d'[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;13H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;5H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;5Hpost {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9Halways {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;13Hemailext([2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;17Hto: 'yeshfaandleeb05@gmail.com',[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;17Hsubject: "Jenkins Pipeline Finished",[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;17Hbody: "Pipeline completed."[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;13H)[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;5H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;1H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[K[?12l[?25h[?25l[31;54H(B[0;7m[ Nothing was cut ](B[m[?12l[?25h[2d[?25l[31;73H[?12l[?25h[2d[?25l[31;73H[?12l[?25h[2d[?25l[31;73H[?12l[?25h[2d[?25l[31;73H[?12l[?25h[2d[?25l[31;73H[?12l[?25h[2d[?25l[31;73H[?12l[?25h[2d[?25l[31;73H[?12l[?25h[2d[?25l[31;73H[?12l[?25h[2d[?25l[31;73H[?12l[?25h[2d[?25l[31;73H[?12l[?25h[2d[?25l[31;73H[?12l[?25h[2d[?25l[31d[K[2;13H}[3;9H}[4;5H}[6dpost {[7dalways {[8;13Hemailext([9;17Hto: 'yeshfaandleeb05@gmail.com',[10;17Hsubject: "Jenkins Pipeline Finished",[11;17Hbody: "Pipeline completed."[12;13H)[13;9H}[14;5H}[15d}[16d[?12l[?25h[?25l[32;16H[16X[32;32H(B[0;7mM-D(B[m DOS Format      [32;61H  (B[0;7mM-A(B[m Append[21X[32;94H(B[0;7mM-B(B[m Backup File[K[33;2H(B[0;7mC(B[m Cancel[16G[16X[33;32H(B[0;7mM-M(B[m Mac Format        [61G  (B[0;7mM-P(B[m Prepend[20X[33;94H(B[0;7m^T(B[m Browse[K[31d(B[0;7mFile Name to Write: Jenkinsfile                                                                                               [31;32H(B[m[?12l[?25h[?25l[31;56H[1K (B[0;7m[ Writing... ](B[m[K[1;73H(B[0;7m [125G(B[m[31;55H(B[0;7m[ Wrote 95 lines ](B[m[32;16H(B[0;7m^O(B[m Write Out   (B[0;7m^W(B[m Where Is    (B[0;7m^K(B[m Cut[32;61H(B[0;7m^T(B[m Execute     (B[0;7m^C(B[m Location    (B[0;7mM-U(B[m Undo       (B[0;7mM-A(B[m Set Mark[33;2H(B[0;7mX(B[m Exit  [16G(B[0;7m^R(B[m Read File   (B[0;7m^\(B[m Replace     (B[0;7m^U(B[m Paste[61G(B[0;7m^J(B[m Justify     (B[0;7m^/(B[m Go To Line  (B[0;7mM-E(B[m Redo       (B[0;7mM-6(B[m Copy[?12l[?25h[16d[?25l[31d[J[33d[?12l[?25h[33;1H[?1049l[23;0;0t[?1l>[?2004l[?2004h]0;ubuntu@ip-172-31-76-219: ~/docker-task-cleanubuntu@ip-172-31-76-219:~/docker-task-clean$ ls
-[?2004l [0m[01;34mGreenX_DCS_Assesment_Tool-main[0m   Jenkinsfile   [01;31mjenkins_2.452.1_all.deb[0m  '{'
-[?2004h]0;ubuntu@ip-172-31-76-219: ~/docker-task-cleanubuntu@ip-172-31-76-219:~/docker-task-clean$ nano docker[K[K[K[K[K[K[7mdocker-compose.yml[27mdocker-compose.yml
-[?2004l[?2004h[?1049h[22;0;0t[1;33r(B[m[4l[?7h[39;49m[?1h=[?1h=[?25l[39;49m(B[m[H[2J[31;58H(B[0;7m[ New File ](B[m[H(B[0;7m  GNU nano 7.2                                          docker-compose.yml                                                    [1;125H(B[m[32d(B[0;7m^G(B[m Help[32;16H(B[0;7m^O(B[m Write Out   (B[0;7m^W(B[m Where Is    (B[0;7m^K(B[m Cut[32;61H(B[0;7m^T(B[m Execute     (B[0;7m^C(B[m Location    (B[0;7mM-U(B[m Undo[106G(B[0;7mM-A(B[m Set Mark[33d(B[0;7m^X(B[m Exit[33;16H(B[0;7m^R(B[m Read File   (B[0;7m^\(B[m Replace     (B[0;7m^U(B[m Paste[61G(B[0;7m^J(B[m Justify     (B[0;7m^/(B[m Go To Line  (B[0;7mM-E(B[m Redo[106G(B[0;7mM-6(B[m Copy[2d[?12l[?25h[?25l[1;76H(B[0;7m*[31d(B[m[K[1;125H[2ddocker-compose.yml[?12l[?25h[?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h[K[?25l[?12l[?25h [?25l[?12l[?25h[K[?25l[31;49H(B[0;7m[ ^W = Ctrl+W    M-W = Alt+W ](B[m[?12l[?25h[2d[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l[?12l[?25h[?25l(B[0;1m[32mversion(B[0m: (B[0;1m[35m'3.8'[4d[32mservices(B[0m:[5;3H(B[0;1m[32mbackend(B[0m:[6;5H(B[0;1m[32mimage(B[0m: (B[mgreenx-backend:latest[7;5H(B[0;1m[32mports(B[0m:[8;6H(B[0;1m[33m[1K - [35m"8000:8000"[10;3H[32mfrontend(B[0m:[11;5H(B[0;1m[32mimage(B[0m: (B[mgreenx-frontend:latest[12;5H(B[0;1m[32mports(B[0m:[13;6H(B[0;1m[33m[1K - [35m"3000:3000"[15d(B[0m[3m[36m# اگر آپ کو مزید کنفیگریشن کی ضرورت ہو تو یہاں اضافی سیٹنگز ڈال سکتی ہیں۔[31d[39m(B[m[K[16d[?12l[?25h[?25l[15;74H[?12l[?25h[?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h[K[?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h[K[?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h[K[?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h[K[?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h[K[?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h [?25l[?12l[?25h[K[?25l[32;16H[16X[32;32H(B[0;7mM-D(B[m DOS Format      [32;61H  (B[0;7mM-A(B[m Append[21X[32;94H(B[0;7mM-B(B[m Backup File[K[33;2H(B[0;7mC(B[m Cancel[16G[16X[33;32H(B[0;7mM-M(B[m Mac Format        [61G  (B[0;7mM-P(B[m Prepend[20X[33;94H(B[0;7m^T(B[m Browse[K[31d(B[0;7mFile Name to Write: docker-compose.yml                                                                                        [31;39H(B[m[?12l[?25h[?25l[31;56H[1K (B[0;7m[ Writing... ](B[m[K[1;76H(B[0;7m [125G(B[m[31;55H(B[0;7m[ Wrote 14 lines ](B[m[32;16H(B[0;7m^O(B[m Write Out   (B[0;7m^W(B[m Where Is    (B[0;7m^K(B[m Cut[32;61H(B[0;7m^T(B[m Execute     (B[0;7m^C(B[m Location    (B[0;7mM-U(B[m Undo       (B[0;7mM-A(B[m Set Mark[33;2H(B[0;7mX(B[m Exit  [16G(B[0;7m^R(B[m Read File   (B[0;7m^\(B[m Replace     (B[0;7m^U(B[m Paste[61G(B[0;7m^J(B[m Justify     (B[0;7m^/(B[m Go To Line  (B[0;7mM-E(B[m Redo       (B[0;7mM-6(B[m Copy[?12l[?25h[15d[?25l[31d[J[33d[?12l[?25h[33;1H[?1049l[23;0;0t[?1l>[?2004l[?2004h]0;ubuntu@ip-172-31-76-219: ~/docker-task-cleanubuntu@ip-172-31-76-219:~/docker-task-clean$ nano docker-compose.ymlls[Knano Jenkinsfilegit push origin main[4Pnano Jenkinsfile
-[?2004l[?2004h[?1049h[22;0;0t[1;33r(B[m[4l[?7h[39;49m[?1h=[?1h=[?25l[39;49m(B[m[H[2J[31;57H(B[0;7m[ Reading... ](B[m[31;55H(B[0;7m[ Read 95 lines ](B[m[H(B[0;7m  GNU nano 7.2                                              Jenkinsfile                                                       [1;125H(B[m[32d(B[0;7m^G(B[m Help[32;16H(B[0;7m^O(B[m Write Out   (B[0;7m^W(B[m Where Is    (B[0;7m^K(B[m Cut[32;61H(B[0;7m^T(B[m Execute     (B[0;7m^C(B[m Location    (B[0;7mM-U(B[m Undo[106G(B[0;7mM-A(B[m Set Mark[33d(B[0;7m^X(B[m Exit[33;16H(B[0;7m^R(B[m Read File   (B[0;7m^\(B[m Replace     (B[0;7m^U(B[m Paste[61G(B[0;7m^J(B[m Justify     (B[0;7m^/(B[m Go To Line  (B[0;7mM-E(B[m Redo[106G(B[0;7mM-6(B[m Copy[2dpipeline {[3;5Hagent any[5;5Henvironment {[6;9HSONARQUBE_URL = '(B[0;1m[34mhttp://18.207.238.222:9000'[7;5H[39m(B[m}[9dstages {[11;9Hstage('Checkout') {[12;13Hsteps {[13;17Hcheckout scm[14;13H}[15;9H}[17dstage('SonarQube Analysis') {[18;13Hsteps {[19;17HwithSonarQubeEnv('MySonar') {[20;21HwithCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_LOGIN')]) {[21;25Hsh """[22;25H/opt/sonar-scanner/bin/sonar-scanner \[23;27H-Dsonar.projectKey=GreenX \[24;27H-Dsonar.projectName=GreenX \[25;27H-Dsonar.sources=. \[26;27H-Dsonar.host.url=$SONARQUBE_URL \[27;27H-Dsonar.login=$SONAR_LOGIN[28;25H"""[29;21H}[30;17H}[2d[?12l[?25h[?25l[1;73H(B[0;7m*[125G(B[m[2;31r[31;1H
-[1;33r[30;13H}[K[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9Hstage('Quality Gate') {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;13Hsteps {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;17Htimeout(time: 10, unit: 'MINUTES') {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;21HwaitForQualityGate abortPipeline: true[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;17H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;13H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9Hstage('Docker Build Backend') {[2d[?12l[?25h[?25l[2;31r[31;1H[2S[1;33r[29;13Hsteps {[30;17Hsh 'docker build -t greenx-backend ./GreenX_DCS_Assesment_Tool-main/GreenX_DCS_Assesment_Tool_Backend'[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;13H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9Hstage('Docker Build Frontend') {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;13Hsteps {[2d[?12l[?25h[?25l[2;31r[31;1H[2S[1;33r[29;17Hsh 'docker build -t greenx-frontend ./GreenX_DCS_Assesment_Tool-main/greenX-assessment-tool-frontend'[30;13H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9Hstage('Docker Push') {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;13Hsteps {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;17HwithCredentials([usernamePassword([2d[?12l[?25h[?25l[2;31r[31;1H[2S[1;33r[29;21HcredentialsId: 'dockerhub_creds',[30;21HusernameVariable: 'DOCKER_USER',[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;21HpasswordVariable: 'DOCKER_PASS'[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;17H)]) {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;21Hsh """[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;25Hecho $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;25Hdocker tag greenx-backend $DOCKER_USER/greenx-backend:latest[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;25Hdocker tag greenx-frontend $DOCKER_USER/greenx-frontend:latest[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;25Hdocker push $DOCKER_USER/greenx-backend:latest[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;25Hdocker push $DOCKER_USER/greenx-frontend:latest[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;21H"""[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;17H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;13H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9Hstage('Approval') {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;13Hsteps {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;17Hscript {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;21Hinput message: 'Deploy to production?'[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;17H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;13H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9Hstage('Deploy using Docker Compose') {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;13Hsteps {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;17Hsh 'docker compose -f docker-compose.yml up -d'[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;13H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;5H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;5Hpost {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9Halways {[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;13Hemailext([2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;17Hto: 'yeshfaandleeb05@gmail.com',[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;17Hsubject: "Jenkins Pipeline Finished",[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;17Hbody: "Pipeline completed."[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;13H)[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;9H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;5H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[30;1H}[2d[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[2;31r[31;1H
-[1;33r[2;1H[?12l[?25h[?25l[K[?12l[?25h[?25l[31;54H(B[0;7m[ Nothing was cut ](B[m[?12l[?25h[2d[?25l[31;73H[?12l[?25h[2d[?25l[31;73H[?12l[?25h[2d[?25l[31;73H[?12l[?25h[2d[?25l[31;73H[?12l[?25h[2d[?25l[31;73H[?12l[?25h[2d[?25l[31;73H[?12l[?25h[2d[?25l[31;73H[?12l[?25h[2d[?25l[31;73H[?12l[?25h[2d[?25l[31;73H[?12l[?25h[2d[?25l[31;73H[?12l[?25h[2d[?25l[31;73H[?12l[?25h[2d[?25l[31;73H[?12l[?25h[2d[?25l[31d[K[2;13H}[3;9H}[4;5H}[6dpost {[7dalways {[8;13Hemailext([9;17Hto: 'yeshfaandleeb05@gmail.com',[10;17Hsubject: "Jenkins Pipeline Finished",[11;17Hbody: "Pipeline completed successfully."[12;13H)[13;9H}[14;5H}[15d}[16d[?12l[?25h[?25l[32;16H[16X[32;32H(B[0;7mM-D(B[m DOS Format      [32;61H  (B[0;7mM-A(B[m Append[21X[32;94H(B[0;7mM-B(B[m Backup File[K[33;2H(B[0;7mC(B[m Cancel[16G[16X[33;32H(B[0;7mM-M(B[m Mac Format        [61G  (B[0;7mM-P(B[m Prepend[20X[33;94H(B[0;7m^T(B[m Browse[K[31d(B[0;7mFile Name to Write: Jenkinsfile                                                                                               [31;32H(B[m[?12l[?25h[?25l[31;56H[1K (B[0;7m[ Writing... ](B[m[K[1;73H(B[0;7m [125G(B[m[31;55H(B[0;7m[ Wrote 95 lines ](B[m[32;16H(B[0;7m^O(B[m Write Out   (B[0;7m^W(B[m Where Is    (B[0;7m^K(B[m Cut[32;61H(B[0;7m^T(B[m Execute     (B[0;7m^C(B[m Location    (B[0;7mM-U(B[m Undo       (B[0;7mM-A(B[m Set Mark[33;2H(B[0;7mX(B[m Exit  [16G(B[0;7m^R(B[m Read File   (B[0;7m^\(B[m Replace     (B[0;7m^U(B[m Paste[61G(B[0;7m^J(B[m Justify     (B[0;7m^/(B[m Go To Line  (B[0;7mM-E(B[m Redo       (B[0;7mM-6(B[m Copy[?12l[?25h[16d[?25l[31d[J[33d[?12l[?25h[33;1H[?1049l[23;0;0t[?1l>[?2004l[?2004h]0;ubuntu@ip-172-31-76-219: ~/docker-task-cleanubuntu@ip-172-31-76-219:~/docker-task-clean$ [7mgit add .[27m
-[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Cgit add .
-[A
-[?2004
