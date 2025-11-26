@@ -1,29 +1,10 @@
-version: "3.9"
-
 services:
-
-  greenx-backend:
-    image: "${DOCKER_USER}/greenx-backend:${BUILD_NUMBER}"
-    container_name: greenx-backend
-    restart: always
+  backend:
+    image: yeshfaandleeb1/greenx-backend:latest
     ports:
       - "8089:80"
-    environment:
-      - NODE_ENV=production
-    networks:
-      - greenx-net
 
-  greenx-frontend:
-    image: "${DOCKER_USER}/greenx-frontend:${BUILD_NUMBER}"
-    container_name: greenx-frontend
-    restart: always
+  frontend:
+    image: yeshfaandleeb1/greenx-frontend:latest
     ports:
       - "8088:80"
-    depends_on:
-      - greenx-backend
-    networks:
-      - greenx-net
-
-networks:
-  greenx-net:
-    driver: bridge

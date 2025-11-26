@@ -41,7 +41,7 @@ pipeline {
         ================================= */
         stage('Quality Gate') {
             steps {
-                echo "Skipping Quality Gate (Not supported in SonarQube Community Edition)"
+                echo "Skipping Quality Gate (Not supported in Community Edition)"
             }
         }
 
@@ -52,7 +52,7 @@ pipeline {
             steps {
                 sh '''
                     echo "Building Backend Image..."
-                    docker build -t greenx-backend:${BUILD_NUMBER} \
+                    docker build -t yeshfaandleeb1/greenx-backend:latest \
                     ./GreenX_DCS_Assesment_Tool-main/GreenX_DCS_Assesment_Tool_Backend
                 '''
             }
@@ -65,59 +65,45 @@ pipeline {
             steps {
                 sh '''
                     echo "Building Frontend Image..."
-                    docker build -t greenx-frontend:${BUILD_NUMBER} \
+                    docker build -t yeshfaandleeb1/greenx-frontend:latest \
                     ./GreenX_DCS_Assesment_Tool-main/greenX-assessment-tool-frontend
                 '''
             }
         }
 
         /* ================================
-           TRIVY SCAN + PUSH (PARALLEL)
+           TRIVY + PUSH PARALLEL
         ================================= */
         stage('Scan & Push Images (Parallel Stage)') {
             steps {
                 script {
                     parallel(
 
-                        /* ---------- TRIVY SCAN ---------- */
-                        "Trivy Image Scan": {
+                        "Trivy Scan": {
                             sh '''
-                                echo "===== Creating Trivy Reports Folder ====="
                                 mkdir -p trivy-reports
 
-                                echo "===== Scanning Backend Image ====="
                                 trivy image --format template --template @/opt/trivy-templates/html.tpl \
-                                -o trivy-reports/trivy-backend-report.html greenx-backend:${BUILD_NUMBER}
+                                -o trivy-reports/backend.html yeshfaandleeb1/greenx-backend:latest
 
-                                echo "===== Scanning Frontend Image ====="
                                 trivy image --format template --template @/opt/trivy-templates/html.tpl \
-                                -o trivy-reports/trivy-frontend-report.html greenx-frontend:${BUILD_NUMBER}
+                                -o trivy-reports/frontend.html yeshfaandleeb1/greenx-frontend:latest
                             '''
 
                             archiveArtifacts artifacts: 'trivy-reports/*.html', fingerprint: true
                         },
 
-                        /* ---------- DOCKER PUSH ---------- */
                         "Docker Push": {
                             withCredentials([usernamePassword(
                                 credentialsId: 'dockerhub-credentials',
                                 usernameVariable: 'DOCKER_USER',
                                 passwordVariable: 'DOCKER_PASS'
                             )]) {
-
                                 sh '''
-                                    echo "===== Logging into Docker Hub ====="
                                     echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
 
-                                    echo "===== Tagging Images ====="
-                                    docker tag greenx-backend:${BUILD_NUMBER} $DOCKER_USER/greenx-backend:${BUILD_NUMBER}
-                                    docker tag greenx-frontend:${BUILD_NUMBER} $DOCKER_USER/greenx-frontend:${BUILD_NUMBER}
-
-                                    echo "===== Pushing Images ====="
-                                    docker push $DOCKER_USER/greenx-backend:${BUILD_NUMBER}
-                                    docker push $DOCKER_USER/greenx-frontend:${BUILD_NUMBER}
-
-                                    echo "===== PUSH COMPLETE ====="
+                                    docker push yeshfaandleeb1/greenx-backend:latest
+                                    docker push yeshfaandleeb1/greenx-frontend:latest
                                 '''
                             }
                         }
@@ -127,40 +113,54 @@ pipeline {
         }
 
         /* ================================
-           7. DEPLOY USING DOCKER COMPOSE
+           MANUAL APPROVAL BEFORE DEPLOYMENT
         ================================= */
-        stage('Deploy Using Docker Compose') {
+        stage('Approval Required') {
             steps {
-                echo "Deploying latest images using Docker Compose..."
+                script {
+                    emailext(
+                        to: "yeshfaandleeb05@gmail.com",
+                        subject: "APPROVAL REQUIRED: GreenX Pipeline Build #${BUILD_NUMBER}",
+                        body: """\
+Hello,
 
-                sh '''
-                    docker compose -f docker-compose.images.yml pull
-                    docker compose -f docker-compose.images.yml up -d
-                '''
+The pipeline is waiting for manual approval before deployment.
 
-                echo """
-                Deployment Completed Successfully!
-                Vote Page   → http://localhost:8089
-                Result Page → http://localhost:8088
-                """
+Click to approve:
+${env.BUILD_URL}
+
+Thanks,
+Jenkins System
+"""
+                    )
+
+                    timeout(time: 30, unit: 'MINUTES') {
+                        input message: "Approve deployment to production?", ok: "DEPLOY NOW"
+                    }
+                }
             }
         }
 
         /* ================================
-           GIT PUSH BACK (FINAL STAGE)
+           DEPLOY USING DOCKER COMPOSE
         ================================= */
-        stage('Git Push Updates') {
+        stage('Deploy Using Docker Compose') {
             steps {
-                sh '''
-                    echo "Pushing updates back to repository..."
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-credentials',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                        echo "===== Pulling Latest Images ====="
+                        docker compose -f docker-compose.images.yml pull
 
-                    git config --global user.email "yeshfaandleeb05@gmail.com"
-                    git config --global user.name "jenkins"
+                        echo "===== Starting Deployment ====="
+                        docker compose -f docker-compose.images.yml up -d
 
-                    git add .
-                    git commit -m "Auto: Jenkins pipeline updates"
-                    git push https://github.com/yeshfaandleeb1/docker-task-clean.git main || true
-                '''
+                        echo "===== Deployment Completed ====="
+                    '''
+                }
             }
         }
     }
