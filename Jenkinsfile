@@ -3,33 +3,54 @@ pipeline {
 
     stages {
 
-        /* -----------------------------------------
-           1. DOCKER BUILD STAGE
-        ------------------------------------------ */
-        stage('Docker Build') {
+        /* ================================
+           DOCKER BUILD BACKEND
+        ================================= */
+        stage('Docker Build Backend') {
             steps {
                 sh '''
                     echo "===== Building Backend Image ====="
-                    docker build -t greenx-backend:${BUILD_NUMBER} ./GreenX_DCS_Assesment_Tool-main/GreenX_DCS_Assesment_Tool_Backend
-
-                    echo "===== Building Frontend Image ====="
-                    docker build -t greenx-frontend:${BUILD_NUMBER} ./GreenX_DCS_Assesment_Tool-main/greenX-assessment-tool-frontend
-
-                    echo "===== Building Worker Image ====="
-                    docker build -t greenx-worker:${BUILD_NUMBER} ./GreenX_DCS_Assesment_Tool-main/worker
+                    docker build -t greenx-backend:${BUILD_NUMBER} \
+                    ./GreenX_DCS_Assesment_Tool-main/GreenX_DCS_Assesment_Tool_Backend
                 '''
             }
         }
 
-        /* -----------------------------------------
-           2. TRIVY SCAN + DOCKER PUSH (PARALLEL)
-        ------------------------------------------ */
+        /* ================================
+           DOCKER BUILD FRONTEND
+        ================================= */
+        stage('Docker Build Frontend') {
+            steps {
+                sh '''
+                    echo "===== Building Frontend Image ====="
+                    docker build -t greenx-frontend:${BUILD_NUMBER} \
+                    ./GreenX_DCS_Assesment_Tool-main/greenX-assessment-tool-frontend
+                '''
+            }
+        }
+
+        /* ================================
+           DOCKER BUILD WORKER
+        ================================= */
+        stage('Docker Build Worker') {
+            steps {
+                sh '''
+                    echo "===== Building Worker Image ====="
+                    docker build -t greenx-worker:${BUILD_NUMBER} \
+                    ./GreenX_DCS_Assesment_Tool-main/worker
+                '''
+            }
+        }
+
+        /* ================================
+           TRIVY SCAN + DOCKER PUSH (PARALLEL)
+        ================================= */
         stage('Scan & Push Images (Parallel Stage)') {
             steps {
                 script {
                     parallel(
 
-                        /* ------ TRIVY SCAN ------ */
+                        /* ---- TRIVY IMAGE SCAN ---- */
                         "Trivy Image Scan": {
                             sh '''
                                 echo "===== Creating Trivy Reports Folder ====="
@@ -51,7 +72,7 @@ pipeline {
                             archiveArtifacts artifacts: 'trivy-reports/*.html', fingerprint: true
                         },
 
-                        /* ------ DOCKER PUSH ------ */
+                        /* ---- DOCKER PUSH ---- */
                         "Docker Push": {
                             withCredentials([usernamePassword(
                                 credentialsId: 'dockerhub-credentials',
@@ -68,16 +89,12 @@ pipeline {
                                     docker tag greenx-frontend:${BUILD_NUMBER} $DOCKER_USER/greenx-frontend:${BUILD_NUMBER}
                                     docker tag greenx-worker:${BUILD_NUMBER} $DOCKER_USER/greenx-worker:${BUILD_NUMBER}
 
-                                    echo "===== Pushing Backend Image ====="
+                                    echo "===== Pushing Images to DockerHub ====="
                                     docker push $DOCKER_USER/greenx-backend:${BUILD_NUMBER}
-
-                                    echo "===== Pushing Frontend Image ====="
                                     docker push $DOCKER_USER/greenx-frontend:${BUILD_NUMBER}
-
-                                    echo "===== Pushing Worker Image ====="
                                     docker push $DOCKER_USER/greenx-worker:${BUILD_NUMBER}
 
-                                    echo "===== Docker Push Completed Successfully ====="
+                                    echo "===== ALL IMAGES PUSHED SUCCESSFULLY ====="
                                 '''
                             }
                         }
