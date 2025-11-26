@@ -1,11 +1,55 @@
 pipeline {
     agent any
 
+    environment {
+        SONAR_SCANNER_HOME = tool 'DefaultScanner'
+    }
+
     stages {
 
-        /* =====================================
-           YOUR BACKEND BUILD (UNCHANGED)
-        ====================================== */
+        /* ================================
+           CHECKOUT CODE
+        ================================= */
+        stage('Checkout') {
+            steps {
+                echo "Checking out code..."
+                git url: 'https://github.com/yeshfaandleeb1/docker-task-clean.git', branch: 'main'
+            }
+        }
+
+        /* ================================
+           SONARQUBE SCAN
+        ================================= */
+        stage('SonarQube Analysis') {
+            steps {
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                    withSonarQubeEnv('SonarQube-Local') {
+                        sh """
+                            ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
+                              -Dsonar.projectKey=docker-task \
+                              -Dsonar.sources=. \
+                              -Dsonar.host.url=http://192.168.1.17:9000 \
+                              -Dsonar.token=${SONAR_TOKEN}
+                        """
+                    }
+                }
+            }
+        }
+
+        /* ================================
+           SONAR QUALITY GATE
+        ================================= */
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 10, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        /* ================================
+           DOCKER BUILD BACKEND
+        ================================= */
         stage('Docker Build Backend') {
             steps {
                 sh '''
@@ -16,9 +60,9 @@ pipeline {
             }
         }
 
-        /* =====================================
-           YOUR FRONTEND BUILD (UNCHANGED)
-        ====================================== */
+        /* ================================
+           DOCKER BUILD FRONTEND
+        ================================= */
         stage('Docker Build Frontend') {
             steps {
                 sh '''
@@ -29,15 +73,15 @@ pipeline {
             }
         }
 
-        /* =====================================
-           TRIVY SCAN + DOCKER PUSH (PARALLEL)
-        ====================================== */
+        /* ================================
+           TRIVY SCAN + PUSH (PARALLEL)
+        ================================= */
         stage('Scan & Push Images (Parallel Stage)') {
             steps {
                 script {
                     parallel(
 
-                        /* ---- TRIVY SCAN ---- */
+                        /* ---------- TRIVY SCAN ---------- */
                         "Trivy Image Scan": {
                             sh '''
                                 echo "===== Creating Trivy Reports Folder ====="
@@ -55,7 +99,7 @@ pipeline {
                             archiveArtifacts artifacts: 'trivy-reports/*.html', fingerprint: true
                         },
 
-                        /* ---- DOCKER PUSH ---- */
+                        /* ---------- DOCKER PUSH ---------- */
                         "Docker Push": {
                             withCredentials([usernamePassword(
                                 credentialsId: 'dockerhub-credentials',
