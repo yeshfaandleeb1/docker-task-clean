@@ -37,7 +37,36 @@ pipeline {
         }
 
         /* ================================
-           DISABLED QUALITY GATE
+           MANUAL APPROVAL BEFORE BUILD
+        ================================= */
+        stage('Approval Required') {
+            steps {
+                script {
+                    emailext(
+                        to: "yeshfaandleeb05@gmail.com",
+                        subject: "APPROVAL REQUIRED: GreenX Pipeline Build #${BUILD_NUMBER}",
+                        body: """\
+Hello,
+
+Your GreenX CI/CD pipeline is waiting for manual approval.
+
+Click this link to approve the deployment:
+${env.BUILD_URL}
+
+Thanks,
+Jenkins CI/CD System
+"""
+                    )
+
+                    timeout(time: 30, unit: 'MINUTES') {
+                        input message: "Approve Deployment?", ok: "Deploy Now"
+                    }
+                }
+            }
+        }
+
+        /* ================================
+           SKIP QUALITY GATE (Community Edition)
         ================================= */
         stage('Quality Gate') {
             steps {
@@ -52,7 +81,7 @@ pipeline {
             steps {
                 sh '''
                     echo "Building Backend Image..."
-                    docker build -t yeshfaandleeb1/greenx-backend:latest \
+                    docker build -t greenx-backend:${BUILD_NUMBER} \
                     ./GreenX_DCS_Assesment_Tool-main/GreenX_DCS_Assesment_Tool_Backend
                 '''
             }
@@ -65,45 +94,51 @@ pipeline {
             steps {
                 sh '''
                     echo "Building Frontend Image..."
-                    docker build -t yeshfaandleeb1/greenx-frontend:latest \
+                    docker build -t greenx-frontend:${BUILD_NUMBER} \
                     ./GreenX_DCS_Assesment_Tool-main/greenX-assessment-tool-frontend
                 '''
             }
         }
 
         /* ================================
-           TRIVY + PUSH PARALLEL
+           TRIVY SCAN + PUSH (PARALLEL)
         ================================= */
         stage('Scan & Push Images (Parallel Stage)') {
             steps {
                 script {
                     parallel(
 
-                        "Trivy Scan": {
+                        /* ---------- TRIVY SCAN ---------- */
+                        "Trivy Image Scan": {
                             sh '''
                                 mkdir -p trivy-reports
 
                                 trivy image --format template --template @/opt/trivy-templates/html.tpl \
-                                -o trivy-reports/backend.html yeshfaandleeb1/greenx-backend:latest
+                                -o trivy-reports/trivy-backend-report.html greenx-backend:${BUILD_NUMBER}
 
                                 trivy image --format template --template @/opt/trivy-templates/html.tpl \
-                                -o trivy-reports/frontend.html yeshfaandleeb1/greenx-frontend:latest
+                                -o trivy-reports/trivy-frontend-report.html greenx-frontend:${BUILD_NUMBER}
                             '''
 
                             archiveArtifacts artifacts: 'trivy-reports/*.html', fingerprint: true
                         },
 
+                        /* ---------- DOCKER PUSH ---------- */
                         "Docker Push": {
                             withCredentials([usernamePassword(
                                 credentialsId: 'dockerhub-credentials',
                                 usernameVariable: 'DOCKER_USER',
                                 passwordVariable: 'DOCKER_PASS'
                             )]) {
+
                                 sh '''
                                     echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
 
-                                    docker push yeshfaandleeb1/greenx-backend:latest
-                                    docker push yeshfaandleeb1/greenx-frontend:latest
+                                    docker tag greenx-backend:${BUILD_NUMBER} $DOCKER_USER/greenx-backend:${BUILD_NUMBER}
+                                    docker tag greenx-frontend:${BUILD_NUMBER} $DOCKER_USER/greenx-frontend:${BUILD_NUMBER}
+
+                                    docker push $DOCKER_USER/greenx-backend:${BUILD_NUMBER}
+                                    docker push $DOCKER_USER/greenx-frontend:${BUILD_NUMBER}
                                 '''
                             }
                         }
@@ -113,54 +148,14 @@ pipeline {
         }
 
         /* ================================
-           MANUAL APPROVAL BEFORE DEPLOYMENT
-        ================================= */
-        stage('Approval Required') {
-            steps {
-                script {
-                    emailext(
-                        to: "yeshfaandleeb05@gmail.com",
-                        subject: "APPROVAL REQUIRED: GreenX Pipeline Build #${BUILD_NUMBER}",
-                        body: """\
-Hello,
-
-The pipeline is waiting for manual approval before deployment.
-
-Click to approve:
-${env.BUILD_URL}
-
-Thanks,
-Jenkins System
-"""
-                    )
-
-                    timeout(time: 30, unit: 'MINUTES') {
-                        input message: "Approve deployment to production?", ok: "DEPLOY NOW"
-                    }
-                }
-            }
-        }
-
-        /* ================================
            DEPLOY USING DOCKER COMPOSE
         ================================= */
         stage('Deploy Using Docker Compose') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-credentials',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-                    sh '''
-                        echo "===== Pulling Latest Images ====="
-                        docker compose -f docker-compose.images.yml pull
-
-                        echo "===== Starting Deployment ====="
-                        docker compose -f docker-compose.images.yml up -d
-
-                        echo "===== Deployment Completed ====="
-                    '''
-                }
+                sh '''
+                    docker compose -f docker-compose.images.yml pull
+                    docker compose -f docker-compose.images.yml up -d
+                '''
             }
         }
     }
