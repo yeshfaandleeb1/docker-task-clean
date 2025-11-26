@@ -37,24 +37,24 @@ pipeline {
         }
 
         /* ================================
-           MANUAL APPROVAL BEFORE BUILD
+           MANUAL APPROVAL
         ================================= */
         stage('Approval Required') {
             steps {
                 script {
                     emailext(
                         to: "yeshfaandleeb05@gmail.com",
-                        subject: "APPROVAL REQUIRED: GreenX Pipeline Build #${BUILD_NUMBER}",
+                        subject: "APPROVAL REQUIRED: GreenX Deployment Build #${BUILD_NUMBER}",
                         body: """\
 Hello,
 
-Your GreenX CI/CD pipeline is waiting for manual approval.
+Your deployment is waiting for manual approval.
 
-Click this link to approve the deployment:
+Open this link and approve:
 ${env.BUILD_URL}
 
 Thanks,
-Jenkins CI/CD System
+Jenkins CI/CD
 """
                     )
 
@@ -62,15 +62,6 @@ Jenkins CI/CD System
                         input message: "Approve Deployment?", ok: "Deploy Now"
                     }
                 }
-            }
-        }
-
-        /* ================================
-           SKIP QUALITY GATE (Community Edition)
-        ================================= */
-        stage('Quality Gate') {
-            steps {
-                echo "Skipping Quality Gate (Not supported in Community Edition)"
             }
         }
 
@@ -111,11 +102,14 @@ Jenkins CI/CD System
                         /* ---------- TRIVY SCAN ---------- */
                         "Trivy Image Scan": {
                             sh '''
+                                echo "===== Creating Trivy Reports Folder ====="
                                 mkdir -p trivy-reports
 
+                                echo "===== Scanning Backend Image ====="
                                 trivy image --format template --template @/opt/trivy-templates/html.tpl \
                                 -o trivy-reports/trivy-backend-report.html greenx-backend:${BUILD_NUMBER}
 
+                                echo "===== Scanning Frontend Image ====="
                                 trivy image --format template --template @/opt/trivy-templates/html.tpl \
                                 -o trivy-reports/trivy-frontend-report.html greenx-frontend:${BUILD_NUMBER}
                             '''
@@ -132,11 +126,14 @@ Jenkins CI/CD System
                             )]) {
 
                                 sh '''
+                                    echo "===== Logging into Docker Hub ====="
                                     echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
 
+                                    echo "===== Tagging Images ====="
                                     docker tag greenx-backend:${BUILD_NUMBER} $DOCKER_USER/greenx-backend:${BUILD_NUMBER}
                                     docker tag greenx-frontend:${BUILD_NUMBER} $DOCKER_USER/greenx-frontend:${BUILD_NUMBER}
 
+                                    echo "===== Pushing Images ====="
                                     docker push $DOCKER_USER/greenx-backend:${BUILD_NUMBER}
                                     docker push $DOCKER_USER/greenx-frontend:${BUILD_NUMBER}
                                 '''
@@ -152,11 +149,62 @@ Jenkins CI/CD System
         ================================= */
         stage('Deploy Using Docker Compose') {
             steps {
-                sh '''
-                    docker compose -f docker-compose.images.yml pull
-                    docker compose -f docker-compose.images.yml up -d
-                '''
+                sh """
+                    echo "===== Pulling Latest Images ====="
+                    BUILD_NUMBER=${BUILD_NUMBER} docker compose -f docker-compose.images.yml pull
+
+                    echo "===== Deploying Stack ====="
+                    BUILD_NUMBER=${BUILD_NUMBER} docker compose -f docker-compose.images.yml up -d
+                """
             }
+        }
+    }
+
+    /* ========================================
+       POST EXECUTION EMAIL NOTIFICATIONS
+    ========================================= */
+    post {
+        success {
+            emailext(
+                to: "yeshfaandleeb05@gmail.com",
+                subject: "SUCCESS ✔ GreenX Pipeline #${BUILD_NUMBER}",
+                body: """\
+🎉 Deployment Successful!
+
+Build Number: ${BUILD_NUMBER}
+
+🔗 SonarQube Dashboard:
+http://192.168.1.36:9000/dashboard?id=docker-task
+
+📊 Trivy Reports:
+Backend → ${env.BUILD_URL}artifact/trivy-reports/trivy-backend-report.html
+Frontend → ${env.BUILD_URL}artifact/trivy-reports/trivy-frontend-report.html
+
+🌐 Live Application:
+Vote Page → http://localhost:8089
+Result Page → http://localhost:8088
+
+Regards,
+Jenkins CI/CD System
+"""
+            )
+        }
+
+        failure {
+            emailext(
+                to: "yeshfaandleeb05@gmail.com",
+                subject: "❌ FAILURE: GreenX Pipeline #${BUILD_NUMBER}",
+                body: """\
+The build failed.
+
+Check Jenkins logs:
+${env.BUILD_URL}
+
+Please fix the issue and rerun.
+
+– Jenkins CI/CD System
+"""
+            )
         }
     }
 }
