@@ -28,7 +28,7 @@ pipeline {
                             ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
                               -Dsonar.projectKey=docker-task \
                               -Dsonar.sources=. \
-                              -Dsonar.host.url=http://192.168.1.17:9000 \
+                              -Dsonar.host.url=http://192.168.1.36:9000 \
                               -Dsonar.token=${SONAR_TOKEN}
                         """
                     }
