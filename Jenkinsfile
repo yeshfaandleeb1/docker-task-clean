@@ -1,45 +1,89 @@
-stage('Scan & Push Images (Parallel Stage)') {
-    parallel(
-        "Trivy Image Scan": {
-            node {
+pipeline {
+    agent any
+
+    stages {
+
+        /* -----------------------------------------
+           1. DOCKER BUILD STAGE
+        ------------------------------------------ */
+        stage('Docker Build') {
+            steps {
                 sh '''
-                    mkdir -p trivy-reports
+                    echo "===== Building Backend Image ====="
+                    docker build -t greenx-backend:${BUILD_NUMBER} ./GreenX_DCS_Assesment_Tool-main/GreenX_DCS_Assesment_Tool_Backend
 
-                    echo "=== Trivy Scan: Backend ==="
-                    trivy image --format html --output trivy-reports/trivy-vote-report.html greenx-backend:${BUILD_NUMBER}
+                    echo "===== Building Frontend Image ====="
+                    docker build -t greenx-frontend:${BUILD_NUMBER} ./GreenX_DCS_Assesment_Tool-main/greenX-assessment-tool-frontend
 
-                    echo "=== Trivy Scan: Frontend ==="
-                    trivy image --format html --output trivy-reports/trivy-result-report.html greenx-frontend:${BUILD_NUMBER}
-
-                    echo "=== Trivy Scan: Worker ==="
-                    trivy image --format html --output trivy-reports/trivy-worker-report.html greenx-worker:${BUILD_NUMBER}
+                    echo "===== Building Worker Image ====="
+                    docker build -t greenx-worker:${BUILD_NUMBER} ./GreenX_DCS_Assesment_Tool-main/worker
                 '''
-
-                archiveArtifacts artifacts: 'trivy-reports/*.html', fingerprint: true
             }
-        },
+        }
 
-        "Docker Push": {
-            node {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-credentials',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
+        /* -----------------------------------------
+           2. TRIVY SCAN + DOCKER PUSH (PARALLEL)
+        ------------------------------------------ */
+        stage('Scan & Push Images (Parallel Stage)') {
+            steps {
+                script {
+                    parallel(
 
-                    sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        /* ------ TRIVY SCAN ------ */
+                        "Trivy Image Scan": {
+                            sh '''
+                                echo "===== Creating Trivy Reports Folder ====="
+                                mkdir -p trivy-reports
 
-                        docker tag greenx-backend:${BUILD_NUMBER} aleemdevops/greenx-backend:${BUILD_NUMBER}
-                        docker tag greenx-frontend:${BUILD_NUMBER} aleemdevops/greenx-frontend:${BUILD_NUMBER}
-                        docker tag greenx-worker:${BUILD_NUMBER} aleemdevops/greenx-worker:${BUILD_NUMBER}
+                                echo "===== Scanning Backend Image ====="
+                                trivy image --format template --template @/opt/trivy-templates/html.tpl \
+                                  -o trivy-reports/trivy-backend-report.html greenx-backend:${BUILD_NUMBER}
 
-                        docker push aleemdevops/greenx-backend:${BUILD_NUMBER}
-                        docker push aleemdevops/greenx-frontend:${BUILD_NUMBER}
-                        docker push aleemdevops/greenx-worker:${BUILD_NUMBER}
-                    '''
+                                echo "===== Scanning Frontend Image ====="
+                                trivy image --format template --template @/opt/trivy-templates/html.tpl \
+                                  -o trivy-reports/trivy-frontend-report.html greenx-frontend:${BUILD_NUMBER}
+
+                                echo "===== Scanning Worker Image ====="
+                                trivy image --format template --template @/opt/trivy-templates/html.tpl \
+                                  -o trivy-reports/trivy-worker-report.html greenx-worker:${BUILD_NUMBER}
+                            '''
+
+                            archiveArtifacts artifacts: 'trivy-reports/*.html', fingerprint: true
+                        },
+
+                        /* ------ DOCKER PUSH ------ */
+                        "Docker Push": {
+                            withCredentials([usernamePassword(
+                                credentialsId: 'dockerhub-credentials',
+                                usernameVariable: 'DOCKER_USER',
+                                passwordVariable: 'DOCKER_PASS'
+                            )]) {
+
+                                sh '''
+                                    echo "===== Logging into Docker Hub ====="
+                                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+
+                                    echo "===== Tagging Images ====="
+                                    docker tag greenx-backend:${BUILD_NUMBER} $DOCKER_USER/greenx-backend:${BUILD_NUMBER}
+                                    docker tag greenx-frontend:${BUILD_NUMBER} $DOCKER_USER/greenx-frontend:${BUILD_NUMBER}
+                                    docker tag greenx-worker:${BUILD_NUMBER} $DOCKER_USER/greenx-worker:${BUILD_NUMBER}
+
+                                    echo "===== Pushing Backend Image ====="
+                                    docker push $DOCKER_USER/greenx-backend:${BUILD_NUMBER}
+
+                                    echo "===== Pushing Frontend Image ====="
+                                    docker push $DOCKER_USER/greenx-frontend:${BUILD_NUMBER}
+
+                                    echo "===== Pushing Worker Image ====="
+                                    docker push $DOCKER_USER/greenx-worker:${BUILD_NUMBER}
+
+                                    echo "===== Docker Push Completed Successfully ====="
+                                '''
+                            }
+                        }
+                    )
                 }
             }
         }
-    )
+    }
 }
