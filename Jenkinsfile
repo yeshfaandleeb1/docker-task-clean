@@ -37,13 +37,11 @@ pipeline {
         }
 
         /* ================================
-           SONAR QUALITY GATE
+           DISABLED QUALITY GATE
         ================================= */
         stage('Quality Gate') {
             steps {
-                timeout(time: 10, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
+                echo "Skipping Quality Gate (Not supported in SonarQube Community Edition)"
             }
         }
 
@@ -129,28 +127,41 @@ pipeline {
         }
 
         /* ================================
-           DEPLOY STAGE (NEWLY ADDED)
+           7. DEPLOY USING DOCKER COMPOSE
         ================================= */
         stage('Deploy Using Docker Compose') {
             steps {
+                echo "Deploying latest images using Docker Compose..."
+
                 sh '''
-                    echo "========== STARTING DEPLOYMENT =========="
-
-                    if [ -f docker-compose.images.yml ]; then
-                        echo "docker-compose.images.yml found"
-                    else
-                        echo "ERROR: docker-compose.images.yml NOT FOUND!"
-                        exit 1
-                    fi
-
-                    docker compose -f docker-compose.images.yml down || true
-                    docker compose -f docker-compose.images.yml pull || true
+                    docker compose -f docker-compose.images.yml pull
                     docker compose -f docker-compose.images.yml up -d
-
-                    echo "========== DEPLOYMENT DONE =========="
                 '''
+
+                echo """
+                Deployment Completed Successfully!
+                Vote Page   → http://localhost:8089
+                Result Page → http://localhost:8088
+                """
             }
         }
 
+        /* ================================
+           GIT PUSH BACK (FINAL STAGE)
+        ================================= */
+        stage('Git Push Updates') {
+            steps {
+                sh '''
+                    echo "Pushing updates back to repository..."
+
+                    git config --global user.email "yeshfaandleeb05@gmail.com"
+                    git config --global user.name "jenkins"
+
+                    git add .
+                    git commit -m "Auto: Jenkins pipeline updates"
+                    git push https://github.com/yeshfaandleeb1/docker-task-clean.git main || true
+                '''
+            }
+        }
     }
 }
