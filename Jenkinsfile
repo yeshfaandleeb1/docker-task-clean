@@ -18,7 +18,7 @@ pipeline {
         }
 
         /* ================================
-           SONARQUBE ANALYSIS
+           SONARQUBE SCAN
         ================================= */
         stage('SonarQube Analysis') {
             steps {
@@ -43,19 +43,6 @@ pipeline {
             steps {
                 timeout(time: 10, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
-                }
-            }
-        }
-
-        /* ================================
-           APPROVAL REQUIRED BEFORE DEPLOY
-        ================================= */
-        stage('Manual Approval for Deploy') {
-            steps {
-                script {
-                    timeout(time: 15, unit: 'MINUTES') {
-                        input message: "Approval Required: Deploy to Production?", ok: "Deploy Now"
-                    }
                 }
             }
         }
@@ -87,7 +74,7 @@ pipeline {
         }
 
         /* ================================
-           TRIVY SCAN & PUSH (PARALLEL)
+           TRIVY SCAN + PUSH (PARALLEL)
         ================================= */
         stage('Scan & Push Images (Parallel Stage)') {
             steps {
@@ -142,70 +129,28 @@ pipeline {
         }
 
         /* ================================
-           DEPLOY USING DOCKER COMPOSE
+           DEPLOY STAGE (NEWLY ADDED)
         ================================= */
-        stage('Deploy to Production') {
+        stage('Deploy Using Docker Compose') {
             steps {
                 sh '''
-                    echo "========================================"
-                    echo "     DEPLOYING USING DOCKER COMPOSE     "
-                    echo "========================================"
+                    echo "========== STARTING DEPLOYMENT =========="
+
+                    if [ -f docker-compose.images.yml ]; then
+                        echo "docker-compose.images.yml found"
+                    else
+                        echo "ERROR: docker-compose.images.yml NOT FOUND!"
+                        exit 1
+                    fi
 
                     docker compose -f docker-compose.images.yml down || true
                     docker compose -f docker-compose.images.yml pull || true
                     docker compose -f docker-compose.images.yml up -d
 
-                    echo "==== DEPLOY FINISHED ===="
+                    echo "========== DEPLOYMENT DONE =========="
                 '''
             }
         }
-    }
 
-    /* ================================
-       POST EXECUTION EMAILS
-    ================================= */
-    post {
-        success {
-            emailext(
-                to: "yeshfaandleeb05@gmail.com",
-                subject: "SUCCESS: Build #${BUILD_NUMBER} Deployed Successfully!",
-                body: """
-Hello Team,
-
-The pipeline has successfully completed and the application is deployed.
-
-BUILD NUMBER: ${BUILD_NUMBER}
-
-SONARQUBE DASHBOARD:
-http://192.168.1.36:9000/dashboard?id=docker-task
-
-TRIVY REPORTS:
-Backend: http://192.168.1.36:8080/job/GreenX-CICD-Pipeline/${BUILD_NUMBER}/artifact/trivy-reports/trivy-backend-report.html
-Frontend: http://192.168.1.36:8080/job/GreenX-CICD-Pipeline/${BUILD_NUMBER}/artifact/trivy-reports/trivy-frontend-report.html
-
-LIVE APPLICATION:
-Vote App: http://localhost:8089
-Result App: http://localhost:8088
-
-Regards,
-Jenkins CI/CD Pipeline
-                """
-            )
-        }
-
-        failure {
-            emailext(
-                to: "yeshfaandleeb05@gmail.com",
-                subject: "FAILED: Build #${BUILD_NUMBER}",
-                body: """
-Build FAILED.
-
-Check Jenkins logs and fix the issue.
-
-Pipeline: GreenX-CICD-Pipeline  
-Build Number: ${BUILD_NUMBER}
-                """
-            )
-        }
     }
 }
