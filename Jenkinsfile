@@ -161,6 +161,13 @@ Jenkins CI/CD System
         stage('Deploy Using Docker Compose') {
             steps {
                 script {
+
+                    echo "===== Removing Old Containers ====="
+                    sh '''
+                        docker rm -f greenx-frontend || true
+                        docker rm -f greenx-backend || true
+                    '''
+
                     echo "===== Pulling Latest Images ====="
                     sh """
                         docker compose -f docker-compose.images.yml pull
