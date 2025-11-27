@@ -1,25 +1,16 @@
-version: "3.8"
+version: "3.9"
 
 services:
-
   backend:
-    image: "yeshfaandleeb1/greenx-backend:${BUILD_NUMBER}"
+    image: yeshfaandleeb01/greenx-backend:latest
     container_name: greenx-backend
     restart: always
     ports:
-      - "8089:80"         # Vote Page (Backend)
-    environment:
-      - NODE_ENV=production
+      - "8001:8080"
 
   frontend:
-    image: "yeshfaandleeb1/greenx-frontend:${BUILD_NUMBER}"
+    image: yeshfaandleeb01/greenx-frontend:latest
     container_name: greenx-frontend
     restart: always
     ports:
-      - "8088:80"         # Result Page (Frontend)
-    environment:
-      - NODE_ENV=production
-
-networks:
-  default:
-    driver: bridge
+      - "8002:80"

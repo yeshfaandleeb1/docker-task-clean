@@ -37,6 +37,15 @@ pipeline {
         }
 
         /* ================================
+           QUALITY GATE (DISABLED)
+        ================================= */
+        stage('Quality Gate') {
+            steps {
+                echo "Skipping Quality Gate (Not supported in Community Edition)"
+            }
+        }
+
+        /* ================================
            MANUAL APPROVAL
         ================================= */
         stage('Approval Required') {
@@ -44,17 +53,17 @@ pipeline {
                 script {
                     emailext(
                         to: "yeshfaandleeb05@gmail.com",
-                        subject: "APPROVAL REQUIRED: GreenX Deployment Build #${BUILD_NUMBER}",
+                        subject: "APPROVAL REQUIRED: GreenX Pipeline Build #${BUILD_NUMBER}",
                         body: """\
 Hello,
 
-Your deployment is waiting for manual approval.
+Your GreenX CI/CD pipeline is waiting for manual approval.
 
-Open this link and approve:
+Click this link to approve deployment:
 ${env.BUILD_URL}
 
 Thanks,
-Jenkins CI/CD
+Jenkins CI/CD System
 """
                     )
 
@@ -136,6 +145,8 @@ Jenkins CI/CD
                                     echo "===== Pushing Images ====="
                                     docker push $DOCKER_USER/greenx-backend:${BUILD_NUMBER}
                                     docker push $DOCKER_USER/greenx-frontend:${BUILD_NUMBER}
+
+                                    echo "===== PUSH COMPLETE ====="
                                 '''
                             }
                         }
@@ -149,40 +160,41 @@ Jenkins CI/CD
         ================================= */
         stage('Deploy Using Docker Compose') {
             steps {
-                sh """
+                script {
                     echo "===== Pulling Latest Images ====="
-                    BUILD_NUMBER=${BUILD_NUMBER} docker compose -f docker-compose.images.yml pull
+                    sh """
+                        docker compose -f docker-compose.images.yml pull
+                    """
 
-                    echo "===== Deploying Stack ====="
-                    BUILD_NUMBER=${BUILD_NUMBER} docker compose -f docker-compose.images.yml up -d
-                """
+                    echo "===== Deploying Containers ====="
+                    sh """
+                        docker compose -f docker-compose.images.yml up -d
+                    """
+                }
             }
         }
     }
 
-    /* ========================================
-       POST EXECUTION EMAIL NOTIFICATIONS
-    ========================================= */
+    /* ================================
+       POST-EXECUTION EMAILS
+    ================================= */
     post {
         success {
             emailext(
                 to: "yeshfaandleeb05@gmail.com",
-                subject: "SUCCESS ✔ GreenX Pipeline #${BUILD_NUMBER}",
+                subject: "SUCCESS: GreenX Build #${BUILD_NUMBER}",
                 body: """\
-🎉 Deployment Successful!
+Build #${BUILD_NUMBER} deployed successfully!
 
-Build Number: ${BUILD_NUMBER}
+✔ Backend:  http://192.168.1.36:8001
+✔ Frontend: http://192.168.1.36:8002
 
-🔗 SonarQube Dashboard:
+SonarQube Dashboard:
 http://192.168.1.36:9000/dashboard?id=docker-task
 
-📊 Trivy Reports:
-Backend → ${env.BUILD_URL}artifact/trivy-reports/trivy-backend-report.html
-Frontend → ${env.BUILD_URL}artifact/trivy-reports/trivy-frontend-report.html
-
-🌐 Live Application:
-Vote Page → http://localhost:8089
-Result Page → http://localhost:8088
+Trivy Scan Reports:
+Backend:  ${env.BUILD_URL}artifact/trivy-reports/trivy-backend-report.html
+Frontend: ${env.BUILD_URL}artifact/trivy-reports/trivy-frontend-report.html
 
 Regards,
 Jenkins CI/CD System
@@ -193,16 +205,15 @@ Jenkins CI/CD System
         failure {
             emailext(
                 to: "yeshfaandleeb05@gmail.com",
-                subject: "❌ FAILURE: GreenX Pipeline #${BUILD_NUMBER}",
+                subject: "FAILED: GreenX Build #${BUILD_NUMBER}",
                 body: """\
-The build failed.
+Build #${BUILD_NUMBER} failed!
 
-Check Jenkins logs:
+Check Jenkins logs here:
 ${env.BUILD_URL}
 
-Please fix the issue and rerun.
-
-– Jenkins CI/CD System
+Regards,
+Jenkins CI/CD System
 """
             )
         }
