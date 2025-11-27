@@ -1,26 +1,22 @@
-# ===============================
-# 1) BUILD STAGE
-# ===============================
-FROM node:18 AS builder
-
+# --------------------------
+# 1) BUILD REACT APP
+# --------------------------
+FROM node:18 AS build
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 COPY . .
 RUN npm run build
 
+# --------------------------
+# 2) SERVE WITH NGINX
+# --------------------------
+FROM nginx:latest
 
-# ===============================
-# 2) DEPLOY STAGE WITH NGINX
-# ===============================
-FROM nginx:alpine
+COPY --from=build /app/build /usr/share/nginx/html
 
-# Copy build output to nginx directory
-COPY --from=builder /app/build /usr/share/nginx/html
-
-# Expose frontend port
-EXPOSE 80
+EXPOSE 8002
 
 CMD ["nginx", "-g", "daemon off;"]

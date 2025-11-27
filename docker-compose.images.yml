@@ -6,7 +6,7 @@ services:
     container_name: greenx-backend
     restart: always
     ports:
-      - "8001:8080"
+      - "8001:8001"
 
   frontend:
     image: yeshfaandleeb01/greenx-frontend:latest
